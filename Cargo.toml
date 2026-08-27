@@ -1,0 +1,7 @@
+[package]
+name = "hotkeys2bash"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+hotkey-listener = "0.3.2"
