@@ -6,16 +6,12 @@ use std::sync::mpsc::{Receiver, Sender, channel};
 mod config;
 
 
-/*let receiver = thread::spawn(move || {
-    let value = rx.recv().expect("Unable to receive from channel");
-    println!("{value}");
-});*/
-fn keyeventcatcher(handle: HotkeyListenerHandle, tx: Sender<u8>) {
+fn keyeventcatcher(handle: HotkeyListenerHandle, tx: Sender<usize>) {
     loop {
         match handle.recv_timeout(Duration::from_millis(100)) {
             Ok(HotkeyEvent::Pressed(idx)) => {
                 // TODO: figure out a way to map index of hotkey to defined hotkeys from builder
-                // tx.send(idx);
+                tx.send(idx).expect("failed to send");
                 println!("pressed {:?}", idx);
 
             },
@@ -27,14 +23,29 @@ fn keyeventcatcher(handle: HotkeyListenerHandle, tx: Sender<u8>) {
     }
 }
 
-fn keyeventhandeler(rx: Receiver<u8>) {
-    match rx.try_recv() {
-        Ok(idx) => println!("{}", idx),
-        Err(_) => { /* err handel */}
+fn keyeventhandeler(rx: Receiver<usize>) {
+    loop {
+        match rx.try_recv() {
+            Ok(idx) => handlekey(idx),
+            Err(_) => { /* err handel */}
 
+        }
     }
-
 }
+
+fn handlekey(idx: usize) {
+    match idx {
+        0 => {
+            let out = Command::new("wlcrosshairctl").arg("toggle").output().expect("failed to execute");
+            println!("{}", String::from_utf8(out.stdout).unwrap())
+        },
+        // add your commands here or whatever should happen
+        // in order in which they were defined in main()
+        // TODO: create config
+        _ => println!("no matches"),
+    }
+}
+
 fn main() {
     let (tx, rx) = channel();
 
@@ -43,8 +54,8 @@ fn main() {
 
 
 
-    hotkey_builder = hotkey_builder.add_hotkey(parse_hotkey("F10").unwrap())
-
+    hotkey_builder = hotkey_builder.add_hotkey(parse_hotkey("Shift+F10").unwrap())
+    // add you hotkeys here
     ;
 
 
