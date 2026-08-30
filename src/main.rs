@@ -23,40 +23,42 @@ fn keyeventcatcher(handle: HotkeyListenerHandle, tx: Sender<usize>) {
     }
 }
 
-fn keyeventhandeler(rx: Receiver<usize>) {
+fn keyeventhandeler(rx: Receiver<usize>, configs: Vec<config::HotkeyMapping>) {
     loop {
         match rx.try_recv() {
-            Ok(idx) => handlekey(idx),
+            Ok(idx) => handlekey(&configs[idx]),
             Err(_) => { /* err handel */}
 
         }
     }
 }
 
-fn handlekey(idx: usize) {
-    match idx {
-        0 => {
-            let out = Command::new("wlcrosshairctl").arg("toggle").output().expect("failed to execute");
-            println!("{}", String::from_utf8(out.stdout).unwrap())
-        },
-        // add your commands here or whatever should happen
-        // in order in which they were defined in main()
-        // TODO: create config
-        _ => println!("no matches"),
-    }
+fn handlekey(config: &config::HotkeyMapping) {
+
+    let out = Command::new(config.cmd.clone())
+        .arg(config.args.clone())
+        .output()
+        .expect("failed to execute");
+
+    println!("{}", String::from_utf8(out.stdout).unwrap())
+
+
+
 }
 
 fn main() {
     let (tx, rx) = channel();
 
     let mut hotkey_builder = HotkeyListenerBuilder::new();
-    let c = config::parse_config("config.ini");
+    let config_lists = match config::parse_config("/home/nils/Projects/RUST_PROJECTS/hotkeys2bash/config.ini"){
+        Some(l) => l,
+        None => panic!("couldnt load configfile"),
+    };
 
 
-
-    hotkey_builder = hotkey_builder.add_hotkey(parse_hotkey("Shift+F10").unwrap())
-    // add you hotkeys here
-    ;
+    for config in &config_lists {
+        hotkey_builder = hotkey_builder.add_hotkey(config.hotkey.clone());
+    }
 
 
     // Build and start the listener - no manual shutdown flag needed
@@ -67,8 +69,9 @@ fn main() {
     let handle_send = thread::spawn(move || {
         keyeventcatcher(handle, tx)
     });
+
     let handle_recv = thread::spawn(move || {
-        keyeventhandeler(rx)
+        keyeventhandeler(rx, config_lists)
     });
 
     handle_send.join().unwrap();

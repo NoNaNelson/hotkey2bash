@@ -1,38 +1,43 @@
+use std::{fmt::Debug, path::StripPrefixError};
 use hotkey_listener::{Hotkey, parse_hotkey};
 use configparser::ini::Ini;
 
-use std::fs;
-
-// #[derive(Deserialize, Debug)]
+#[derive(Debug)]
 pub struct HotkeyMapping {
     pub idx: u8,
     pub cmd: String,
-    pub args: Option<String>,
+    pub args: String,
     pub hotkey: Hotkey
 }
 
 
-impl HotkeyMapping {
-    pub fn new(idx: u8, cmd: &str, mut args: Option<&str>, hotkey: &str) -> Self{
-
-        return HotkeyMapping{
-            idx,
-            cmd: String::from(cmd),
-            args: if let Some(args) = args {
-                Some(String::from(args))
-            } else {
-                None
-            },
-            hotkey: parse_hotkey(hotkey).unwrap()
-        }
-    }
-}
-
-
-pub fn parse_config(path: &str) {
-    let content = fs::read_to_string(path).unwrap();
+pub fn parse_config(path: &str) -> Option<Vec<HotkeyMapping>>{
 
     let mut config = Ini::new();
-    config.read(content).unwrap();
+    let mut mappings_list: Vec<HotkeyMapping>  = vec![];
 
+    for (i, conf) in config.load(path).unwrap().into_iter().enumerate() {
+        let parsed_args: Option<String> = match conf.1.get("args") {
+            Some(val) => Some(val.clone().unwrap()),
+            None => None
+        };
+
+        let x = HotkeyMapping {
+            idx: i as u8,
+            cmd: conf.1.get("cmd").unwrap().clone().unwrap(),
+            hotkey: parse_hotkey(&conf.1.get("hotkey").unwrap().clone().unwrap()).unwrap(),
+            args: conf
+                .1
+                .get("args")
+                .unwrap()
+                .clone()
+                .unwrap_or_else(|| String::new()),
+        };
+        mappings_list.push(x);
+    }
+    if mappings_list.len() > 0 {
+        return Some(mappings_list)
+    } else {
+        return None
+    }
 }

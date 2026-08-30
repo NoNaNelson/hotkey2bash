@@ -1,0 +1,14 @@
+[Unit]
+Description=hotkey listener daemon
+After=network.target
+
+
+[Service]
+Type=simple
+ExecStart=/home/nils/Projects/RUST_PROJECTS/hotkeys2bash/target/release/hotkeys2bash
+User=nils
+Group=nils
+Restart=always 
+
+[Install]
+WantedBy=default.target
