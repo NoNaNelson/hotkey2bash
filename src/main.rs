@@ -1,10 +1,10 @@
-use hotkey_listener::{HotkeyEvent, Hotkey, HotkeyListenerBuilder, HotkeyListenerHandle, parse_hotkey};
+use hotkey_listener::{HotkeyEvent, Hotkey, HotkeyListenerBuilder, HotkeyListenerHandle};
 use std::time::Duration;
 use std::process::Command;
 use std::thread;
 use std::sync::mpsc::{Receiver, Sender, channel};
+use std::env;
 mod config;
-
 
 fn keyeventcatcher(handle: HotkeyListenerHandle, tx: Sender<usize>) {
     loop {
@@ -49,8 +49,10 @@ fn handlekey(config: &config::HotkeyMapping) {
 fn main() {
     let (tx, rx) = channel();
 
+    let args: Vec<String>  = env::args().collect();
+
     let mut hotkey_builder = HotkeyListenerBuilder::new();
-    let config_lists = match config::parse_config("/home/nils/Projects/RUST_PROJECTS/hotkeys2bash/config.ini"){
+    let config_lists = match config::parse_config(&args[1]){
         Some(l) => l,
         None => panic!("couldnt load configfile"),
     };

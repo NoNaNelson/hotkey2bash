@@ -1,4 +1,4 @@
-use std::{fmt::Debug, path::StripPrefixError};
+use std::fmt::Debug;
 use hotkey_listener::{Hotkey, parse_hotkey};
 use configparser::ini::Ini;
 
@@ -17,10 +17,6 @@ pub fn parse_config(path: &str) -> Option<Vec<HotkeyMapping>>{
     let mut mappings_list: Vec<HotkeyMapping>  = vec![];
 
     for (i, conf) in config.load(path).unwrap().into_iter().enumerate() {
-        let parsed_args: Option<String> = match conf.1.get("args") {
-            Some(val) => Some(val.clone().unwrap()),
-            None => None
-        };
 
         let x = HotkeyMapping {
             idx: i as u8,

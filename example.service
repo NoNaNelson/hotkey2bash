@@ -5,9 +5,9 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/home/nils/Projects/RUST_PROJECTS/hotkeys2bash/target/release/hotkeys2bash
-User=nils
-Group=nils
+ExecStart=/path/to/project/target/release/hotkeys2bash /path/to/config.ini
+User=<user>
+Group=<user>
 Restart=always 
 
 [Install]
