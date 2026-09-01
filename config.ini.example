@@ -1,9 +1,4 @@
-[title]
-cmd = man
-args = ls
-hotkey = Shift+F10
-
-[other title]
-cmd = man
-args = cp 
-hotkey = Shift+F12
+[example]
+hotkey=F1
+cmd=echo
+args=$(whoami)

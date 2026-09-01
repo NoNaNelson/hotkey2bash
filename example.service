@@ -5,9 +5,9 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/path/to/project/target/release/hotkeys2bash /path/to/config.ini
-User=<user>
-Group=<user>
+ExecStart=/usr/local/bin/hotkeys2bash 
+User=${whoami}
+Group=${whoami}
 Restart=always 
 
 [Install]
