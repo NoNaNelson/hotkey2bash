@@ -1,30 +1,43 @@
-use std::fmt::Debug;
-use hotkey_listener::{Hotkey, parse_hotkey};
 use configparser::ini::Ini;
+use hotkey_listener::{Hotkey, parse_hotkey};
+use std::fmt::Debug;
 
 #[derive(Debug)]
 pub struct HotkeyMapping {
     pub idx: u8,
     pub cmd: String,
     pub args: String,
-    pub hotkey: Hotkey
+    pub hotkey: Hotkey,
+    pub on_down: String,
+    pub condition: String,
+    pub con_value: String,
 }
 
-
-pub fn parse_config(path: &str) -> Option<Vec<HotkeyMapping>>{
-
+pub fn parse_config(path: &str) -> Option<Vec<HotkeyMapping>> {
     let mut config = Ini::new();
-    let mut mappings_list: Vec<HotkeyMapping>  = vec![];
+    let mut mappings_list: Vec<HotkeyMapping> = vec![];
 
     for (i, conf) in config.load(path).unwrap().into_iter().enumerate() {
-
         let x = HotkeyMapping {
             idx: i as u8,
             cmd: conf.1.get("cmd").unwrap().clone().unwrap(),
             hotkey: parse_hotkey(&conf.1.get("hotkey").unwrap().clone().unwrap()).unwrap(),
+            on_down: conf.1.get("on_down").unwrap().clone().unwrap(),
             args: conf
                 .1
                 .get("args")
+                .unwrap()
+                .clone()
+                .unwrap_or_else(|| String::new()),
+            condition: conf
+                .1
+                .get("condition")
+                .unwrap()
+                .clone()
+                .unwrap_or_else(|| String::new()),
+            con_value: conf
+                .1
+                .get("con_value")
                 .unwrap()
                 .clone()
                 .unwrap_or_else(|| String::new()),
@@ -32,8 +45,9 @@ pub fn parse_config(path: &str) -> Option<Vec<HotkeyMapping>>{
         mappings_list.push(x);
     }
     if mappings_list.len() > 0 {
-        return Some(mappings_list)
+        Some(mappings_list)
     } else {
-        return None
+        None
     }
 }
+

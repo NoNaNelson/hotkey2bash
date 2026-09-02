@@ -1,4 +1,7 @@
 [example]
-hotkey=F1
+hotkey=F2
 cmd=echo
 args=$(whoami)
+on_down=0
+condition=whoami
+con_value=<username>
