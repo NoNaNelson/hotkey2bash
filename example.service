@@ -1,11 +1,11 @@
 [Unit]
-Description=hotkey listener daemon
+Description=hotkey2bash daemon
 After=network.target
 
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/hotkeys2bash 
+ExecStart=/path/to/hotkeys2bash /path/to/config
 User=${whoami}
 Group=${whoami}
 Restart=always 

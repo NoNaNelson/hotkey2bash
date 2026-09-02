@@ -1,24 +1,31 @@
 #!/usr/bin/sh
 
-
 CUSER=$(whoami)
+PNAME="hotkeys2bashd"
+cargo build --release >/dev/null || exit 1
+mkdir -p /home/$CUSER/.local/bin
+cp -u ./target/release/hotkeys2bash /home/$CUSER/.local/bin/$PNAME || exit 1
 
-echo $CUSER
-exit(1)
+mkdir -p /home/$CUSER/.config/$PNAME || exit 1
+cp -n ./config.ini.example /home/$CUSER/.config/$PNAME/config.ini || exit 1
 
-echo $(which /usr/bin/sh)
+mkdir -p /home/$CUSER/.config/systemd/user || exit 1
+touch $PNAME.service || exit
+cat >/home/$CUSER/.config/systemd/user/$PNAME.service <<EOF
+[Unit]
+Description=$PNAME
+After=network.target
 
-cargo build --release > /dev/null
+[Service]
+Type=simple
+ExecStart=/home/$CUSER/.local/bin/$PNAME /home/$CUSER/.config/$PNAME/config.ini
+User=$CUSER
+Group=$CUSER
+Restart=always 
 
-if [$? != 0]; then
-  exit 1
-done
+[Install]
+WantedBy=default.target
 
-cp ./target/release/hotkeys2bash /usr/local/bin/hotkeys2bashd
+EOF
 
-mkdir -p /home/$(whoami)/.config/systemd/user
-# TODO
-
-mkdir -p /home/$(whoami)/.config/hotkeys2bashd
-cp ./config.ini.example /home/$(whoami)/.config/hotkeys2bashd/config.ini
-
+systemctl --user enable --now $PNAME.service || exit 1
